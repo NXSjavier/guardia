@@ -22,119 +22,186 @@ Plataforma web progresiva (PWA) para la gestión de empresas de seguridad privad
 - **Auth**: Firebase Authentication
 - **PWA**: Vite PWA Plugin
 
-## Requisitos
-
-- Node.js 18+
-- NPM o Yarn
-- Cuenta de Firebase (Firestore, Auth, Messaging)
-
-## Instalación
-
-### 1. Clonar el proyecto
-
-```bash
-cd SAS
-```
-
-### 2. Configurar Backend
-
-```bash
-cd backend
-cp .env.example .env
-# Edita .env con tus credenciales de Firebase Admin
-npm install
-```
-
-### 3. Configurar Frontend
-
-```bash
-cd frontend
-cp .env.example .env
-# Edita .env con tus credenciales de Firebase
-npm install
-```
-
-### 4. Ejecutar
-
-Desarrollo (ambos):
-
-```bash
-# Terminal 1 - Backend
-cd backend
-npm run dev
-
-# Terminal 2 - Frontend  
-cd frontend
-npm run dev
-```
-
-> ⚠️ **HTTPS en desarrollo**
->
-> La PWA sólo se puede instalar desde una conexión segura. Vite se puede
-> iniciar en HTTPS usando un certificado autofirmado (las advertencias del
-> navegador son normales) o con un certificado válido generado con
-> [mkcert](https://github.com/FiloSottile/mkcert):
->
-> ```bash
-> cd frontend
-> mkcert -install
-> mkcert localhost 127.0.0.1 ::1
-> # exporta las rutas al entorno antes de ejecutar npm run dev
-> export SSL_CRT_FILE="$(pwd)/localhost+2.pem"
-> export SSL_KEY_FILE="$(pwd)/localhost+2-key.pem"
-> npm run dev
-> ```
->
-> Alternativamente, puedes usar un túnel HTTPS (ngrok, Cloudflare Tunnel, etc.)
-> apuntando al servidor local HTTP; el túnel gestionará TLS por ti.
-
-
-Producción:
-
-```bash
-cd backend
-npm run build
-npm start
-
-cd frontend
-npm run build
-npm run preview
-```
-
-## Configuración de Firebase
-
-1. Crea un proyecto en [Firebase Console](https://console.firebase.google.com)
-2. Habilita **Authentication** (Email/Password)
-3. Crea una base de datos **Firestore** ( modo de prueba )
-4. Habilita **Firebase Messaging** (opcional para notificaciones push)
-5. Descarga las credenciales de servicio (Service Account)
-6. Configura las variables de entorno
-
 ## Estructura del Proyecto
 
 ```
-├── backend/
-│   ├── src/
-│   │   ├── config/       # Configuración Firebase
-│   │   ├── controllers/  # Lógica de negocio
-│   │   ├── middleware/  # Auth middleware
-│   │   ├── models/       # Tipos TypeScript
-│   │   ├── routes/       # Rutas API
-│   │   └── index.ts      # Entry point
-│   └── package.json
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/  # Componentes UI
-│   │   ├── context/     # React Context
-│   │   ├── pages/       # Páginas
-│   │   ├── services/    # API services
-│   │   ├── types/       # Tipos TypeScript
-│   │   └── App.tsx      # Main app
-│   └── package.json
-│
-└── README.md
+SAS/
+├── backend/          # Servidor API (Node.js + Express + Firebase)
+├── frontend/        # Aplicación web (React + Vite + PWA)
+├── firebase.json    # Configuración Firebase Hosting
+└── railway.json     # Configuración Railway
 ```
+
+---
+
+## Desarrollo Local
+
+### Prerrequisitos
+
+- Node.js 18+
+- npm instalado
+
+### Paso 1: Backend
+
+```bash
+# En la raíz del proyecto
+cd backend
+npm install
+npm run dev
+```
+
+El backend correra en: `http://localhost:3001`
+
+### Paso 2: Frontend
+
+Abre una nueva terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+El frontend correra en: `http://localhost:5173`
+
+**Nota:** El frontend usa un proxy, las peticiones a `/api` se redirigen automaticamente al backend (no necesitas cambiar el .env en desarrollo).
+
+---
+
+## Produccion
+
+### Backend - Railway
+
+**1. Crear proyecto en Railway:**
+
+1. Ve a https://railway.com
+2. Inicia sesion con tu cuenta de GitHub
+3. Click **New Project** → **Deploy from GitHub repo**
+4. Selecciona el repositorio `NXSjavier/guardia`
+
+**2. Configuracion del servicio:**
+
+En la pagina del servicio en Railway, configura:
+
+| Campo | Valor |
+|-------|-------|
+| Root Directory | `backend` |
+| Build Command | `npm run build` |
+| Start Command | `node dist/index.js` |
+
+**3. Agregar variables de entorno:**
+
+En la seccion **Variables** del servicio, agrega:
+
+```
+FIREBASE_PROJECT_ID = studio-243920639-72d26
+FIREBASE_CLIENT_EMAIL = firebase-adminsdk-fbsvc@studio-243920639-72d26.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY = (ver instruccion abajo)
+JWT_SECRET = guardia-management-secret-key-2024
+NODE_ENV = production
+PORT = 8080
+```
+
+**Para obtener FIREBASE_PRIVATE_KEY:**
+
+1. Ve a https://console.firebase.google.com/project/studio-243920639-72d26/settings/serviceaccounts
+2. Click **Generate new private key**
+3. Se descargara un archivo JSON
+4. Abre el archivo y copia el valor de `"private_key"` (todo el texto entre comillas)
+5. Pega ese valor en Railway como `FIREBASE_PRIVATE_KEY`
+
+**4. Generar dominio:**
+
+En Railway, busca el boton **Generate Domain** y haz click.
+Te dara una URL como: `https://guardia-production.up.railway.app`
+
+**5. Redeploy:**
+
+Despues de guardar las variables, Railway hara redeploy automaticamente.
+
+---
+
+### Frontend - Firebase Hosting
+
+**1. Actualizar URL del backend:**
+
+Edita el archivo `frontend/.env`:
+
+```env
+VITE_API_URL=https://guardia-production.up.railway.app
+```
+
+(Reemplaza con tu dominio de Railway)
+
+**2. Build y deploy:**
+
+```bash
+cd frontend
+npm run build
+npx firebase deploy --project studio-243920639-72d26
+```
+
+---
+
+## Actualizar despues de cambios
+
+### Si cambias el backend:
+
+```bash
+git add .
+git commit -m "descripcion del cambio"
+git push origin main
+```
+
+Railway detectara los cambios y hara redeploy automaticamente.
+
+### Si cambias el frontend:
+
+```bash
+cd frontend
+npm run build
+npx firebase deploy --project studio-243920639-72d26
+```
+
+---
+
+## URLs de Produccion
+
+- **Frontend:** https://studio-243920639-72d26.web.app
+- **Backend:** https://guardia-production.up.railway.app
+
+---
+
+## Rutas de la API
+
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| POST | `/api/auth/login` | Iniciar sesion |
+| POST | `/api/auth/registrar` | Registrar usuario |
+| GET | `/api/empresas` | Listar empresas |
+| POST | `/api/empresas` | Crear empresa |
+| GET | `/api/empleados/:empresaId` | Listar empleados |
+| POST | `/api/empleados` | Crear empleado |
+| GET | `/api/sitios/:empresaId` | Listar sitios |
+| POST | `/api/sitios` | Crear sitio |
+| GET | `/api/turnos/:empresaId` | Listar turnos |
+| POST | `/api/turnos` | Crear turno |
+| GET | `/api/reportes/:empresaId` | Listar reportes |
+| POST | `/api/reportes` | Crear reporte |
+| GET | `/api/permisos/:empresaId` | Listar permisos |
+| POST | `/api/permisos` | Crear permiso |
+
+---
+
+## Configuracion de Firebase (referencia)
+
+1. Crea un proyecto en https://console.firebase.google.com
+2. Habilita **Authentication** (Email/Password)
+3. Crea una base de datos **Firestore** (modo de prueba)
+4. Descarga las credenciales de servicio (Service Account)
+5. Configura las variables de entorno
+
+---
 
 ## Licencia
 
