@@ -8,10 +8,15 @@ let serviceAccount: any;
 const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
 if (privateKey && !privateKey.includes('TU_') && !privateKey.includes('your-')) {
+  let key = privateKey;
+  if (key.includes('\\n')) {
+    key = key.replace(/\\n/g, '\n');
+  }
+  
   serviceAccount = {
     type: 'service_account',
     project_id: process.env.FIREBASE_PROJECT_ID || 'studio-243920639-72d26',
-    private_key: privateKey.replace(/\\n/g, '\n'),
+    private_key: key,
     client_email: process.env.FIREBASE_CLIENT_EMAIL || `firebase-adminsdk@${process.env.FIREBASE_PROJECT_ID || 'studio-243920639-72d26'}.iam.gserviceaccount.com`,
   };
 
