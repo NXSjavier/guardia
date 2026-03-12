@@ -30,26 +30,23 @@ export interface Empresa {
 }
 
 export interface Usuario {
-  id: string;
-  empresaId: string;
-  cedula: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
-  rol: Rol;
+  uid?: string;
+  id?: string;
+  empresaId?: string;
+  cedula?: string;
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  telefono?: string;
+  rol?: Rol;
   tipoTurno?: TipoTurnoEmpleado;
-  estado: EstadoEmpleado;
+  estado?: EstadoEmpleado;
   fotoPerfil?: string;
-  documentos: {
-    cedula?: string;
-    licenciaConducir?: string;
-    certificadoSeguridad?: string;
-    otros?: string[];
-  };
+  documentos?: any;
   fcmToken?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: any;
+  updatedAt?: any;
+  [key: string]: any;
 }
 
 export interface Sitio {
