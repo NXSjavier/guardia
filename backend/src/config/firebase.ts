@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-let serviceAccount: admin.ServiceAccount | undefined;
+let serviceAccount: any;
 
 const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 

@@ -4,7 +4,7 @@
   "description": "Backend para Guardia Management System - Gestión de empresas de seguridad privada",
   "main": "dist/index.js",
   "engines": {
-    "node": "18"
+    "node": ">=18"
   },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
