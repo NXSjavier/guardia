@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.rol == role;
+    }
+
+    function hasAnyRole(roles) {
+      return isSignedIn() && request.auth.token.rol in roles;
+    }
+
+    function sameEmpresa(empresaId) {
+      return isSignedIn() && request.auth.token.empresaId == empresaId;
+    }
+
+    match /empresas/{empresaId} {
+      allow read: if hasAnyRole(['administrador', 'supervisor']);
+      allow write: if hasRole('administrador');
+    }
+
+    match /usuarios/{usuarioId} {
+      allow read: if sameEmpresa(resource.data.empresaId);
+      allow create: if sameEmpresa(request.resource.data.empresaId);
+      allow update, delete: if sameEmpresa(resource.data.empresaId)
+        && (hasAnyRole(['administrador', 'supervisor']) || request.auth.uid == usuarioId);
+    }
+
+    match /sitios/{sitioId} {
+      allow read: if sameEmpresa(resource.data.empresaId);
+      allow create: if sameEmpresa(request.resource.data.empresaId);
+      allow update, delete: if sameEmpresa(resource.data.empresaId)
+        && hasAnyRole(['administrador', 'supervisor']);
+    }
+
+    match /turnos/{turnoId} {
+      allow read: if sameEmpresa(resource.data.empresaId);
+      allow create: if sameEmpresa(request.resource.data.empresaId)
+        && hasAnyRole(['administrador', 'supervisor']);
+      allow update, delete: if sameEmpresa(resource.data.empresaId)
+        && hasAnyRole(['administrador', 'supervisor']);
+    }
+
+    match /permisos/{permisoId} {
+      allow read: if sameEmpresa(resource.data.empresaId);
+      allow create: if sameEmpresa(request.resource.data.empresaId);
+      allow update, delete: if sameEmpresa(resource.data.empresaId)
+        && hasAnyRole(['administrador', 'supervisor']);
+    }
+
+    match /reportes/{reporteId} {
+      allow read: if sameEmpresa(resource.data.empresaId);
+      allow create: if sameEmpresa(request.resource.data.empresaId);
+      allow update, delete: if sameEmpresa(resource.data.empresaId)
+        && hasAnyRole(['administrador', 'supervisor']);
+    }
+
+    match /notificaciones/{notificacionId} {
+      allow read: if sameEmpresa(resource.data.empresaId)
+        && (hasAnyRole(['administrador', 'supervisor']) || request.auth.uid == resource.data.usuarioId);
+      allow create: if sameEmpresa(request.resource.data.empresaId)
+        && hasAnyRole(['administrador', 'supervisor']);
+      allow update, delete: if sameEmpresa(resource.data.empresaId)
+        && (hasAnyRole(['administrador', 'supervisor']) || request.auth.uid == resource.data.usuarioId);
+    }
+
+    match /asistencias/{asistenciaId} {
+      allow read: if sameEmpresa(resource.data.empresaId)
+        && (hasAnyRole(['administrador', 'supervisor']) || request.auth.uid == resource.data.empleadoId);
+      allow create: if sameEmpresa(request.resource.data.empresaId)
+        && (hasAnyRole(['administrador', 'supervisor']) || request.auth.uid == request.resource.data.empleadoId);
+      allow update, delete: if false;
+    }
+  }
+}
