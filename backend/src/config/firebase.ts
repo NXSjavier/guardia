@@ -33,8 +33,8 @@ if (privateKey && !privateKey.includes('TU_') && !privateKey.includes('your-')) 
         console.log('✅ Firebase Admin inicializado correctamente');
       }
     }
-  } catch (error) {
-    console.error('❌ Error al inicializar Firebase Admin:', error);
+  } catch (error: any) {
+    console.error('❌ Error al inicializar Firebase Admin:', error.message);
   }
 }
 
