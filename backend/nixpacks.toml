@@ -1,0 +1,4 @@
+[nixpacks]
+node_version = 18
+build = ["npm install", "npm run build"]
+run = "node dist/index.js"
