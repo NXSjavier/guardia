@@ -2,8 +2,8 @@
   "name": "guardia-app",
   "version": "1.0.0",
   "scripts": {
-    "start": "cd backend && node dist/index.js",
-    "build": "cd backend && npm install && cd ../backend && npm run build"
+    "start": "node backend/dist/index.js",
+    "build": "cd backend && npm install && npm run build"
   },
   "dependencies": {}
 }
